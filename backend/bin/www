@@ -8,7 +8,19 @@ const app = require("../app");
 const debug = require("debug")("backend:server");
 const http = require("http");
 const models = require("../models");
+const redis = require('redis');
 
+// redis connection
+const redis_port = process.env.port || 6379;
+const redis_client=redis.createClient(redis_port);
+
+redis_client.on('connect',()=>{
+  console.log('Redis connection has been established');
+})
+
+redis_client.on('error',(err)=>{
+  console.log('Error in connecting redis => ', err);
+})
 /**
  * Get port from environment and store in Express.
  */
@@ -30,6 +42,7 @@ io.on("connection", socket => {
 
   socket.on("message", async data => {
     const { chatRoomName, author, message } = data;
+//  call a function here to handle redis
     const chatRoom = await models.ChatRoom.findAll({
       where: { name: chatRoomName },
     });
